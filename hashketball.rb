@@ -1,7 +1,8 @@
+require 'pry'
 def game_hash
   {
     away: { team_name: 'Charlotte Hornets',
-      colors: %w[Turquoise Purple],
+      colors: ["Turquoise", "Purple"],
       players: [
         { player_name: 'Jeff Adrien',
           number: 4,
@@ -50,7 +51,7 @@ def game_hash
           slam_dunks: 12 }
             ] },
     home: { team_name: 'Brooklyn Nets',
-      colors: %w[Black White],
+      colors: ["Black", "White"],
       players: [
         { player_name: 'Alan Anderson',
           number: 0,
@@ -101,6 +102,29 @@ def game_hash
   }
 end
 
+def players
+  game_hash[:away][:players].concat(game_hash[:home][:players])
+end
+
+def find_player(name)
+  players.find do |player|
+    player[:player_name] == name
+  end
+end
+
+
+def num_points_scored(name)
+  # players.find do |player|
+  #   player[:player_name] == name
+  #   return player[:points]
+  # end
+  find_player(name)[:points]
+end
+  
+def shoe_size(name)
+  find_player(name)[:shoe]
+end
+ 
 def num_points_scored(player_search)
   game_hash.each do |team, team_info|
     team_info[:players].each do |player|
@@ -111,43 +135,62 @@ def num_points_scored(player_search)
   end
 end
 
-def shoe_size(name)
-  game_hash.each do |team, team_info|
-    team_info[:players].each do |player|
-      if player[:player_name] == name
-        return player[:shoe]
-      end
-    end
-  end
-end
+# def shoe_size(name)
+#   game_hash.each do |team, team_info|
+#     team_info[:players].each do |player|
+#       if player[:player_name] == name
+#         return player[:shoe]
+#       end
+#     end
+#   end
+# end
 
-def team_colors(team_input)
-  if team_input.downcase == "charlotte hornets" 
-    return game_hash[:away][:colors]
-  else return game_hash[:home][:colors]
-  end
+
+
+# def team_colors(team_input)
+#   if team_input.downcase == "charlotte hornets" 
+#     return game_hash[:away][:colors]
+#   else return game_hash[:home][:colors]
+#   end
+# end
+
+def teams 
+  game_hash.values
+end
+  
+def team_colors(name)
+  teams.find do |team|
+    team[:team_name] == name
+  end[:colors]
+  # if teams[:team_name] == name
+  #   return 
 end
 
 def team_names
-  game_hash.map do |team, team_info|
-    team_info[:team_name]
+  # game_hash.map do |team, team_info|
+  #   team_info[:team_name]
+  teams.map do |team| #have to iterate first
+    team[:team_name]
   end
 end
 
-def player_numbers(input)
-  output = []
+def player_numbers(team_name)
+
+end
+def player_numbers(team_name)
+  jersey_number = []
   game_hash.each do |team, team_info|
-    if team_info[:team_name] == input 
+    if team_info[:team_name] == team_name 
       team_info.each do |key, value|
         if key == :players
           value.each do |player|
-          output.push(player[:number])
+          jersey_number.push(player[:number])
           end
         end
       end
     end
   end
-  return output
+  return jersey_number
 end
 
 def player_stats(input)
@@ -178,3 +221,93 @@ def big_shoe_rebounds
   end
   return rebounds
 end
+
+def most_points_scored
+  number_scored = -1
+  most_score_player = ''
+  game_hash.each do |team, team_info|
+    team_info[:players].each do |player|
+      while player[:points] > number_scored
+        number_scored = player[:points]
+        most_score_player = player[:player_name]
+      end
+    end
+  end
+  return most_score_player
+end
+
+def winning_team 
+  team_one_total = 0
+  team_two_total = 0
+  winning_team = ''
+  game_hash[:away] do |prop|
+    while prop[:players][:points] != nil
+      team_one_total += prop[:players][:points]
+    end
+  end
+
+  game_hash[:home] do |prop|
+    while prop[:players][:points] != nil
+      team_two_total += prop[:players][:points]
+    end
+  end
+
+  if team_one_total > team_two_total then
+    return 'Charlotte Hornets'
+  else 
+    return 'Brooklyn Nets'
+  end 
+
+end
+
+
+# def player_with_longest_name
+#   name_length = 0
+#   game_hash.each do |location, team|
+    
+#     while team[:players][:player_name].length > name_length
+#       name_length = team[:players][:player_name].length
+#     end
+#   end
+#   return name_length
+# end
+
+def player_with_longest_name
+  player_name = 0
+  longest_player = ''
+  game_hash.each do |team, team_info|
+    team_info[:players].each do |player|
+      while player[:player_name].length > player_name
+        player_name = player[:player_name].length
+        longest_player = player[:player_name]
+      end
+    end
+  end
+  return longest_player
+end
+
+
+def long_name_steals_a_ton?
+  steal = 0
+  player_name = 0
+  longest_player_steal = 0
+  
+  game_hash.each do |team, team_info|
+    team_info[:players].each do |player|
+      while player[:player_name].length > player_name
+        player_name = player[:player_name].length
+        longest_player_steal = player[:steals]
+      end
+    end
+  end
+
+  game_hash.each do |team, team_info|
+    team_info[:players].each do |player|
+      while player[:steals] > steal
+        steal = player[:steals]
+      end
+    end
+  end 
+  #binding.pry
+  return longest_player_steal >= steal
+end 
